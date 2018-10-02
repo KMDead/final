@@ -52,6 +52,10 @@ class ItemController
     public function getById(Request $request, Response $response, $args)
     {
         $Items = $this->ItemService->getById($args['id']);
+        if($Items==[])return $response->withJson(
+            ["ERROR"=>"Товар не найден"],
+            204
+        );
         if(isset($request->getQueryParams()['date'])){
             $date = $request->getQueryParams()['date'];
             $Items = $this->TransferService->batchesComeBack($date, $args['id'], $Items);
@@ -85,7 +89,7 @@ class ItemController
         $Items = $this->ItemService->getByName($args['name']);
         if($Items==[])return $response->withJson(
             ["ERROR"=>"Товар не найден"],
-            200
+            204
         );
         if(isset($request->getQueryParams()['date'])){
             $date = $request->getQueryParams()['date'];
@@ -116,6 +120,10 @@ class ItemController
     public function getByWarehouseId(Request $request, Response $response, $args)
     {
         $Items = $this->ItemService->getByWarehouseId($args['warehouse_id']);
+        if($Items==[])return $response->withJson(
+            ["ERROR"=>"Товар не найден"],
+            204
+        );
         if(isset($request->getQueryParams()['date'])){
             $date = $request->getQueryParams()['date'];
             $Items = $this->TransferService->warehouseComeBack($date, $args['warehouse_id'], $Items);
@@ -165,7 +173,7 @@ class ItemController
                     $jsonResponse,
                     200
                 );
-        }else return $response->withJson($Item, 400);
+        }else return $response->withJson($Item, 204);
     }
 
     public function createItem(Request $request, Response $response, $args)
@@ -188,7 +196,7 @@ class ItemController
                     $jsonResponse,
                     200
                 );
-        }else return $response->withJson($Item, 400);
+        }else return $response->withJson($Item, 204);
     }
 
     public function subItem(Request $request, Response $response, $args)
@@ -213,7 +221,7 @@ class ItemController
                     $jsonResponse,
                     200
                 );
-        }else return $response->withJson($Item, 400);
+        }else return $response->withJson($Item, 204);
     }
 
     public function movItem(Request $request, Response $response, $args)
@@ -225,7 +233,7 @@ class ItemController
         $quantity = $bodyParams['quantity'];
         $movResult = $this->ItemService->movItem($address_source, $address_destiny, $name_item, $quantity);
         if(key_exists("ERROR", $movResult))
-            return $response->withJson($movResult, 400);
+            return $response->withJson($movResult, 204);
         else
         {
              $jsonResponse[] = [
@@ -260,7 +268,7 @@ class ItemController
                     $jsonResponse,
                     200
                 );
-        }else return $response->withJson($Item, 400);
+        }else return $response->withJson($Item, 204);
     }
     public function removeItem(Request $request, Response $response, $args)
     {
@@ -281,6 +289,6 @@ class ItemController
                     $jsonResponse,
                     200
                 );
-        }else return $response->withJson($Item, 400);
+        }else return $response->withJson($Item, 204);
     }
 }

@@ -117,7 +117,7 @@ class TransferRepository extends AbstractRepository
             $Batches = $transfer->getItems();
             foreach ($Batches as $batch) {
                 foreach ($current_items as $current_batch)
-                    if($current_batch->getWarehouseId() === $batch->getWarehouseId() && $current_batch->getId() == $batch->getId() )
+                    if($current_batch->getWarehouseId() == $batch->getWarehouseId() && $current_batch->getId() == $batch->getId() )
                     {
                         echo $current_batch->getQuantity().' - '.$batch->getQuantity()."\n";
                         if($transfer->getType()=='add')$current_batch->setQuantity($current_batch->getQuantity()-$batch->getQuantity());

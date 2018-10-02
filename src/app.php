@@ -96,28 +96,40 @@ $container['transfer.repository'] = function ($c) {
 };
 // init routes
 $app->group('/api', function () use ($app) {
-    $app->get('/warehouses', 'warehouse.controller:getList');
-    $app->get('/warehouses/id/{id}', 'warehouse.controller:getById');
-    $app->get('/warehouses/address/{address}', 'warehouse.controller:getByAddress');
-    $app->post('/warehouses/add', 'warehouse.controller:create');
-    $app->post('/warehouses/update', 'warehouse.controller:update');
-    $app->post('/warehouses/delete', 'warehouse.controller:delete');
-    $app->get('/items', 'item.controller:getList');
-    $app->get('/items/id/{id}', 'item.controller:getById');
-    $app->get('/items/name/{name}', 'item.controller:getByName');
-    $app->get('/items/warehouse/{warehouse_id}', 'item.controller:getByWarehouseId');
-    $app->post('/items/create', 'item.controller:createItem');
-    $app->post('/items/remove', 'item.controller:removeItem');
-    $app->post('/items/update', 'item.controller:updateItem');
-    $app->post('/items/add', 'transfer.controller:addForeignItem');
-    $app->post('/items/sub', 'transfer.controller:subForeignItem');
-    $app->post('/items/mov', 'transfer.controller:movItem');
-    $app->post('/user/registration', 'user.controller:newUser');
-    $app->post('/user/authentication', 'user.controller:AuthUser');
-    $app->get('/user/delete', 'user.controller:DeleteUser');
-    $app->get('/user/exit', 'user.controller:ExitUser');
-    $app->post('/user/update', 'user.controller:UpdateUser');
-    $app->get('/transfers', 'transfer.controller:getAll');
-    $app->get('/transfers/item/{name}', 'transfer.controller:getByItem');
-    $app->get('/transfers/warehouse/{address}', 'transfer.controller:getByWarehouse');
+    $app->group('/warehouse', function () use ($app)
+    {
+        $app->get('', 'warehouse.controller:getList');
+        $app->get('/id/{id}', 'warehouse.controller:getById');
+        $app->get('/address/{address}', 'warehouse.controller:getByAddress');
+        $app->post('/add', 'warehouse.controller:create');
+        $app->post('/update', 'warehouse.controller:update');
+        $app->post('/delete', 'warehouse.controller:delete');
+    });
+    $app->group('/items', function () use ($app)
+    {
+        $app->get('', 'item.controller:getList');
+        $app->get('/id/{id}', 'item.controller:getById');
+        $app->get('/name/{name}', 'item.controller:getByName');
+        $app->get('/warehouse/{warehouse_id}', 'item.controller:getByWarehouseId');
+        $app->post('/create', 'item.controller:createItem');
+        $app->post('/remove', 'item.controller:removeItem');
+        $app->post('/update', 'item.controller:updateItem');
+        $app->post('/add', 'transfer.controller:addForeignItem');
+        $app->post('/sub', 'transfer.controller:subForeignItem');
+        $app->post('/mov', 'transfer.controller:movItem');
+    });
+    $app->group('/user', function () use ($app)
+    {
+        $app->post('/registration', 'user.controller:newUser');
+        $app->post('/authentication', 'user.controller:AuthUser');
+        $app->get('/delete', 'user.controller:DeleteUser');
+        $app->get('/exit', 'user.controller:ExitUser');
+        $app->post('/update', 'user.controller:UpdateUser');
+    });
+    $app->group('/transfers', function () use ($app)
+    {
+        $app->get('', 'transfer.controller:getAll');
+        $app->get('/item/{name}', 'transfer.controller:getByItem');
+        $app->get('/warehouse/{address}', 'transfer.controller:getByWarehouse');
+    });
 });

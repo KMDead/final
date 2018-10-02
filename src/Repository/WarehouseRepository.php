@@ -72,15 +72,32 @@ class WarehouseRepository extends AbstractRepository
         return $w;
     }
 
+    public function getSumQuantity($warehouse)
+    {
+        $rows = $this->dbConnection->executeQuery(
+            'select Item.size, Batch.quantity from Batch, Item where Item.id = Batch.id_item and id_warehouse = ? and
+              Item.User_id = ?;',
+            [$warehouse->getId(), $this->id_user]);
+        $sum = 0;
+        while($row = $rows->fetch(2))
+        {
+            $sum += ($row['size']*$row['quantity']);
+        }
+        return $sum;
+    }
+
     public function updateWarehouse($old_address, $new_address, $new_capacity)
     {
         $warehouse = $this->getByAddress($old_address);
+        $ret = null;
         if($warehouse->getAddress() != null)
         {
             if($new_capacity != "" && $new_capacity != null){
-                $this->dbConnection->executeQuery(
-                    'update final_work.Warehouse set Warehouse.capacity = ? where Warehouse.id = ? and Warehouse.id_user = ?;',
-                    [$new_capacity, $warehouse->getId(), $this->id_user]);
+                if($this->getSumQuantity($warehouse)>$new_capacity) return ["ERROR" => "Мало места."];
+                else
+                    $this->dbConnection->executeQuery(
+                        'update final_work.Warehouse set Warehouse.capacity = ? where Warehouse.id = ? and Warehouse.id_user = ?;',
+                        [$new_capacity, $warehouse->getId(), $this->id_user]);
                 $warehouse = $this->getByAddress($old_address);
             }
 
@@ -94,6 +111,7 @@ class WarehouseRepository extends AbstractRepository
             return $warehouse;
         }
         else {
+
             return ["ERROR"=>"Склад не найден"];
         }
     }

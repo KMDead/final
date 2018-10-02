@@ -43,11 +43,13 @@ class TransferController
         $items = [];
         foreach($item_array as $id => $quantity)
         {
+            if($id == null || $quantity == null)return ['ERROR'=>'неверно указаны товары и их количество'];
             $item = $this->ItemService->getItemById($id);
             if($item != null)
             {
                 $item->setQuantity($quantity);
                 array_push($items, $item);
+
             }
             else {
                 $jsonResponse[] = ['id' => $id, 'status' => 'не найдено'];
@@ -171,7 +173,7 @@ class TransferController
                 array_push($jsonResponse, $res);
             }
         }
-        if($Items == []) return $response->withJson('Продукты не найдены', 400);
+        if($Items == []) return $response->withJson('Продукты не найдены', 204);
         $id = $this->TransferService->addTransfer(null, date('Y-m-d H:i:s'), 'no', 'sub', $source_id, null, $Items);
         $this->TransferService->addTransfer($id, date('Y-m-d H:i:s'), 'no', 'add', $destiny_id, null, null);
         return $response->withJson($jsonResponse, 200);
@@ -179,7 +181,7 @@ class TransferController
     public function getAll(Request $request, Response $response, $args)
     {
         $transfers = $this->TransferService->getTransfers();
-        if($transfers == [])return $response->withJson("Пусто", 400);
+        if($transfers == [])return $response->withJson("Пусто", 204);
         $jsonResponse = [];
         foreach ($transfers as $t)
         {
@@ -212,7 +214,7 @@ class TransferController
     public function getByItem(Request $request, Response $response, $args)
     {
         $transfers = $this->TransferService->getTransfersByItem($args['name']);
-        if($transfers == [])return $response->withJson("Пусто", 400);
+        if($transfers == [])return $response->withJson("Пусто", 204);
         $jsonResponse = [];
         foreach ($transfers as $t)
         {
@@ -245,7 +247,7 @@ class TransferController
     public function getByWarehouse(Request $request, Response $response, $args)
     {
         $transfers = $this->TransferService->getTransfersByWarehouse($args['address']);
-        if($transfers == [])return $response->withJson("Пусто", 400);
+        if($transfers == [])return $response->withJson("Пусто", 204);
         $jsonResponse = [];
         foreach ($transfers as $t)
         {
