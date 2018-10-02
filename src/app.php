@@ -20,8 +20,8 @@ $container = $app->getContainer();
 $container['db'] = function () {
     return DriverManager::getConnection([
         'driver' => 'pdo_mysql',
-        //'host' => '192.168.100.123',
-        'host' => '127.0.0.1',
+        'host' => '192.168.100.123',
+        //'host' => '127.0.0.1',
         'dbname' => 'final_work',
         'user' => 'root',
         'password' => 'root',
