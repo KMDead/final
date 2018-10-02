@@ -54,6 +54,8 @@ class WarehouseRepository extends AbstractRepository
     public function add(Warehouse $warehouse)
     {
         if($this->Check($warehouse)->getAddress() != null) return ["ERROR"=>"Адрес уже используется"];
+        if($warehouse->getAddress() == null)return ["ERROR"=>"Укажите адрес"];
+        if($warehouse->getCapacity() == null)return ["ERROR"=>"Укажите вместительность"];
         $this->dbConnection->executeQuery(
             'INSERT INTO final_work.Warehouse  (address, capacity, id_user) 
               values (?, ?, ?); ', [$warehouse->getAddress(), $warehouse->getCapacity(), $this->id_user]);

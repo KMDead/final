@@ -90,6 +90,7 @@ class ItemService
 
     public function createItem($name, $price, $size, $type)
     {
+        if($name==null ||$price==null|| $size==null|| $type==null) return ['ERROR' => 'Укажите все характеристики'];
         $addItem = new Item(null, $name, $price,
             null, $size, $type, null);
         return $this->ItemRepository->createItem($addItem);
