@@ -43,10 +43,32 @@ class UserRepository extends AbstractRepository
         if(key_exists('ERROR', $oldData))return $oldData;
         $deletedUser = new User($oldData['id'], $oldData['name'], $oldData['email'],$oldData['password'], $oldData['phone'], $oldData['organisation']);
         $this->dbConnection->executeQuery(
-            'delete from final_work.User where User.id = ?',
-            [$this->id_user]
+            'delete from Foreign_transfer where id_transfer in  
+              (select id from Transfer where id_warehouse in (select id from Warehouse where id_user = ?));
+            delete from Transfer_batch where Transfer_id in  
+              (select id from Transfer where id_warehouse in (select id from Warehouse where id_user = ?));
+            delete from Transfer where id_warehouse in (select id from Warehouse where id_user = ?);
+            delete from Batch where id_warehouse in (select id from Warehouse where id_user = ?);
+            delete from Item where User_id = ?;
+            delete from Warehouse where id_user = ?;
+            delete from User where id = ?;',
+            [$this->id_user, $this->id_user, $this->id_user, $this->id_user, $this->id_user,$this->id_user,$this->id_user]
         );
         return $deletedUser;
+    }
+    public function exitUser()
+    {
+        $data = $this->getUser();
+        $User = new User($data['id'], $data['name'], $data['email'], $data['password'], $data['phone'], $data['organisation']);
+        if(key_exists('ERROR', $data)) return $data;
+        $this->dbConnection->executeQuery(
+            'update User set str = null where User.id = ?',
+            [$this->id_user]
+        );
+        setcookie('email', null, 0, '/');
+        setcookie('str', null, 0, '/');
+        return $User;
+
     }
     public function addUser($User)
     {
@@ -82,26 +104,24 @@ class UserRepository extends AbstractRepository
     }
     public function updateUser($newUserDataArray)
     {
-        $deleted = $this->deleteUser();
-        if(key_exists('ERROR',$deleted)) return $deleted;
-        $reserve = new User(null, null,null,null,null,null);
-        $newUser = new User(null, null,null,null,null,null);
-        $reserve->copyFromUser($deleted);
-        $newUser->copyFromUser($deleted);
+        $u = $this->getUser();
+        $newUser = new User($u['id'], $u['name'], $u['email'], $u['password'], $u['phone'], $u['organisation']);
         if(key_exists('name', $newUserDataArray)){$newUser->setName($newUserDataArray['name']);}
         if(key_exists('organisation', $newUserDataArray)){ $newUser->setOrganisation($newUserDataArray['organisation']);}
         if(key_exists('email', $newUserDataArray)){$newUser->setEmail($newUserDataArray['email']);}
         if(key_exists('password', $newUserDataArray)){$newUser->setPassword($newUserDataArray['password']);}
         if(key_exists('phone', $newUserDataArray)){$newUser->setPhone($newUserDataArray['phone']);}
-        $ret = $this->addUser($newUser);
-        if(key_exists('ERROR', $ret))
+        $id = $this->id_user;
+        if($this->checkUniq($newUser)['id'] == $id)
         {
-            $this->addUser($reserve);
-            return $ret;
-        }
-        else
+            $this->dbConnection->executeQuery('
+            update User set name = ?, organisation = ?, email = ?, password = ?, phone = ? where id = ?
+            ', [$newUser->getName(), $newUser->getOrganisation(), $newUser->getEmail(), $newUser->getPassword(), $newUser->getPhone(), $id]);
+            setcookie('email', $newUser->getEmail(), 0, '/');
+        }else
         {
-            return $ret;
+            return ["ERROR"=>"Неверные данн11111ые"];
         }
+        return $newUser;
     }
 }

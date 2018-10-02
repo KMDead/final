@@ -64,8 +64,27 @@ class UserController
     public function UpdateUser(Request $request, Response $response, $args)
     {
         $data = $request->getParsedBody();
-        $newUser = $this->userService->Update(1, $data);
-        if(!key_exists('ERROR', $newUser))
+        $newUser = $this->userService->Update($data);
+        if(!key_exists('ERROR', $newUser)) {
+            return $response->withJson(
+                [
+                    'id' => $newUser->getId(),
+                    'name' => $newUser->getName(),
+                    'organisation' => $newUser->getOrganisation(),
+                    'email' => $newUser->getEmail(),
+                    'phone' => $newUser->getPhone(),
+                    'password' => $newUser->getPassword()
+                ],
+                200
+            );
+        }
+        else return $response->withJson($newUser, 400);
+    }
+    public function DeleteUser(Request $request, Response $response, $args)
+    {
+
+        $newUser = $this->userService->Delete();
+        if(!key_exists('ERROR',$newUser))
             return $response->withJson(
                 [
                     'id' => $newUser->getId(),
@@ -79,10 +98,10 @@ class UserController
             );
         else return $response->withJson($newUser, 400);
     }
-    public function DeleteUser(Request $request, Response $response, $args)
+    public function ExitUser(Request $request, Response $response, $args)
     {
-        $newUser = $this->userService->Delete(1);
-        if($newUser !== false)
+        $newUser = $this->userService->exitUser();
+        if(!key_exists('ERROR',$newUser))
             return $response->withJson(
                 [
                     'id' => $newUser->getId(),
@@ -94,6 +113,6 @@ class UserController
                 ],
                 200
             );
-        else return $response->withJson(["ERROR" => "Неверные данные"], 400);
+        else return $response->withJson($newUser, 400);
     }
 }

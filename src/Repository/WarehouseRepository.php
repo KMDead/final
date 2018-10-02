@@ -29,7 +29,6 @@ class WarehouseRepository extends AbstractRepository
 
     /**
      * @param int $id
-     * @return Warehouse|null
      */
     private function getBy($str)
     {
@@ -103,6 +102,9 @@ class WarehouseRepository extends AbstractRepository
     {
         $warehouse = $this->getByAddress($address);
         if($warehouse->getAddress()==null)return ["ERROR"=>"Склад не найден"];
+        $row = $this->dbConnection->executeQuery('select * from Transfer where id_warehouse = ?',[$warehouse->getAddress()]);
+        $data = $row->fetch(2);
+        if($data['id'] != null) return ["ERROR"=>"Склад уже учитывается в транзакциях"];
         $this->dbConnection->executeQuery(
             'delete from final_work.Warehouse where address = ? and id_user = ?;',
             [$address, $this->id_user]);

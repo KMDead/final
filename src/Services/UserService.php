@@ -29,12 +29,16 @@ class UserService
     {
         return $this->UserRepository->authUser($email, $password);
     }
-    public function Delete($id_user)
+    public function Delete()
     {
-        return $this->UserRepository->deleteUser($id_user);
+        return $this->UserRepository->deleteUser();
     }
-    public function Update($id_user, $newData)
+    public function Update($newData)
     {
-        return $this->UserRepository->updateUser($id_user, $newData);
+        return $this->UserRepository->updateUser($newData);
+    }
+    public function exitUser()
+    {
+        return $this->UserRepository->exitUser();
     }
 }

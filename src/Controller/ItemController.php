@@ -10,6 +10,7 @@ namespace App\Controller;
 
 use App\Model\Item;
 use App\Services\ItemService;
+use App\Services\TransferService;
 use Slim\Http\Cookies;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -20,8 +21,10 @@ class ItemController
      * @var ItemService
     */
     private $ItemService;
-    public function __construct($ItemService)
+    private $TransferService;
+    public function __construct($ItemService, $TransferService)
     {
+        $this->TransferService = $TransferService;
         $this->ItemService = $ItemService;
     }
 
@@ -49,6 +52,10 @@ class ItemController
     public function getById(Request $request, Response $response, $args)
     {
         $Items = $this->ItemService->getById($args['id']);
+        if(isset($request->getQueryParams()['date'])){
+            $date = $request->getQueryParams()['date'];
+            $Items = $this->TransferService->batchesComeBack($date, $args['id'], $Items);
+        }
         $jsonResponse = [];
         foreach ($Items as $Item) {
             $jsonResponse[] = [
@@ -60,6 +67,12 @@ class ItemController
                 'type' => $Item->getType(),
                 'warehouse_id' => $Item->getWarehouseId()
             ];
+        }
+        if($Items!=[])
+        {
+            $sum_size = $this->ItemService->getSumSize($Items);
+            $sum_price = $this->ItemService->getSumPrice($Items);
+            $jsonResponse[] = ['sum_size'=>$sum_size, 'sum_price'=>$sum_price];
         }
         return $response->withJson(
             $jsonResponse,
@@ -70,6 +83,14 @@ class ItemController
     public function getByName(Request $request, Response $response, $args)
     {
         $Items = $this->ItemService->getByName($args['name']);
+        if($Items==[])return $response->withJson(
+            ["ERROR"=>"Товар не найден"],
+            200
+        );
+        if(isset($request->getQueryParams()['date'])){
+            $date = $request->getQueryParams()['date'];
+            $Items = $this->TransferService->batchesComeBack($date, $Items[0]->getId(), $Items);
+        }
         $jsonResponse = [];
         foreach ($Items as $Item) {
             $jsonResponse[] = [
@@ -82,6 +103,10 @@ class ItemController
                 'warehouse_id' => $Item->getWarehouseId()
             ];
         }
+
+        $sum_size = $this->ItemService->getSumSize($Items);
+        $sum_price = $this->ItemService->getSumPrice($Items);
+        $jsonResponse[] = ["Result"=>['sum_size'=>$sum_size, 'sum_price'=>$sum_price]];
         return $response->withJson(
             $jsonResponse,
             200
@@ -91,6 +116,10 @@ class ItemController
     public function getByWarehouseId(Request $request, Response $response, $args)
     {
         $Items = $this->ItemService->getByWarehouseId($args['warehouse_id']);
+        if(isset($request->getQueryParams()['date'])){
+            $date = $request->getQueryParams()['date'];
+            $Items = $this->TransferService->warehouseComeBack($date, $args['warehouse_id'], $Items);
+        }
         $jsonResponse = [];
         foreach ($Items as $Item) {
             $jsonResponse[] = [
@@ -102,6 +131,12 @@ class ItemController
                 'type' => $Item->getType(),
                 'warehouse_id' => $Item->getWarehouseId()
             ];
+        }
+        if($Items!=[])
+        {
+            $sum_size = $this->ItemService->getSumSize($Items);
+            $sum_price = $this->ItemService->getSumPrice($Items);
+            $jsonResponse[] = ["Result"=>['sum_size'=>$sum_size, 'sum_price'=>$sum_price]];
         }
         return $response->withJson(
             $jsonResponse,
@@ -115,6 +150,7 @@ class ItemController
         $Item = $this->ItemService->addItem($bodyParams['name'], $bodyParams['price'],
             $bodyParams['quantity'], $bodyParams['size'], $bodyParams['type'], $bodyParams['id_warehouse']);
         if(!key_exists('ERROR',$Item)) {
+
             $jsonResponse[] = [
                 'id' => $Item->getId(),
                 'name' => $Item->getName(),

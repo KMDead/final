@@ -26,7 +26,7 @@ class ItemService
      */
     public function getList()
     {
-        return $this->ItemRepository->getAll();
+        return $this->ItemRepository->getAllFromItem();
     }
     public function getBy($str)
     {
@@ -35,6 +35,10 @@ class ItemService
     public function getById($id)
     {
         return $this->ItemRepository->getById($id);
+    }
+    public function getItemById($id)
+    {
+        return $this->ItemRepository->getItemById($id)[0];
     }
     public function getByName($name)
     {
@@ -52,7 +56,17 @@ class ItemService
         return $this->ItemRepository->addItem($addItem);
     }
 
-    public function subItem($name, $id_warehouse,$quantity)
+    public function getSumSize($Item)
+    {
+        return $this->ItemRepository->getSumSize($Item);
+    }
+
+    public function getSumPrice($Item)
+    {
+        return $this->ItemRepository->getSumPrice($Item);
+    }
+
+    public function subItem($name, $id_warehouse, $quantity)
     {
         $subItemArray = $this->getBy("name = \"$name\" and id_warehouse = $id_warehouse");
         $subItem = $subItemArray[0];

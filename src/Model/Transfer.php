@@ -24,9 +24,8 @@ class Transfer
         $this->date = $date;
         $this->is_foreign = $is_foreign;
         $this->type = $type;
-        $this->warehouse_id = $warehouse_id;
         $this->foreign_transfer_name = $foreign_transfer_name;
-        $this->items_id = $items_id;
+        $this->items = $items;
     }
     public function getId()
     {

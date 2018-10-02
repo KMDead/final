@@ -45,7 +45,16 @@ class ItemRepository extends AbstractRepository
         }
         return $Items;
     }
-
+    public function getItemById($id)
+    {
+        $Items = [];
+        $rows = $this->dbConnection->executeQuery("select * from Item where User_id = $this->id_user and id = $id;");
+        while ($row = $rows->fetch(\PDO::FETCH_ASSOC)) {
+            $Items[] = new Item($row['id'], $row['name'], $row['price'],
+                null, $row['size'], $row['type'], null);
+        }
+        return $Items;
+    }
     public function getBy($str)
     {
         $Items = [];
@@ -84,7 +93,7 @@ class ItemRepository extends AbstractRepository
     /**
      * @param Item[]
     */
-    private  function getSumSize($Items)
+    public function getSumSize($Items)
     {
         $sum_size = 0;
         foreach ($Items as $Item)
@@ -92,6 +101,16 @@ class ItemRepository extends AbstractRepository
             $sum_size += $Item->getSumSize();
         }
         return $sum_size;
+    }
+
+    public function getSumPrice($Items)
+    {
+        $sum_price = 0;
+        foreach ($Items as $Item)
+        {
+            $sum_price += $Item->getSumPrice();
+        }
+        return $sum_price;
     }
     /**
      * @param Item
@@ -126,7 +145,7 @@ class ItemRepository extends AbstractRepository
     /**
      * @param Item
     */
-    private function checkFreeCapacity($current_item)
+    public function checkFreeCapacity($current_item)
     {
         $row = $this->dbConnection->executeQuery('select capacity
             from Warehouse where id_user = ? and id = ?;',
